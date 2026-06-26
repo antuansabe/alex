@@ -1,0 +1,5 @@
+# AF Solutions - robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://afsolutions.mx/sitemap.xml
