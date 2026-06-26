@@ -14,7 +14,7 @@ export const company = {
   
   // Contacto
   contact: {
-    email: 'servicios.afsolutions@gmail.com',
+    email: 'contacto@afsolutions.com.mx',
     phone: '+52 775 122 9339',
     whatsapp: '527751229339',
     whatsappMessage: 'Hola, me interesa conocer sus servicios de mantenimiento corporativo. ¿Podrían enviarme más información?',
