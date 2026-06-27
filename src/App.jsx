@@ -7,7 +7,6 @@ import WhatsAppButton from './components/layout/WhatsAppButton';
 import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
-import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 
 function ScrollToTop() {
@@ -30,7 +29,6 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/nosotros" element={<About />} />
           <Route path="/servicios" element={<Services />} />
-          <Route path="/galeria" element={<Gallery />} />
           <Route path="/contacto" element={<Contact />} />
         </Routes>
       </main>
