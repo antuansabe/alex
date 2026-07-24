@@ -1,0 +1,66 @@
+/* ==========================================
+   AF SOLUTIONS — AJUSTES POST-REVISIÓN CLIENTE
+   Se carga DESPUÉS de components.css a propósito,
+   así estas reglas ganan sin tener que tocar el
+   archivo original de 1700+ líneas.
+   ========================================== */
+
+/* --- 1. FIX: Botones de service-card no alineados ---
+   Antes: .service-card era block, así que el botón quedaba
+   pegado al final del texto (distinta altura en cada card).
+   Ahora: flex column + body con flex:1 empuja el botón
+   siempre al fondo, alineado entre todas las cards. */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.service-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card-cta {
+  margin-top: auto;
+}
+
+/* --- 2. FIX: Texto justificado en bloques de contenido ---
+   Antes: mezcla de texto centrado (títulos) e izquierda
+   (párrafos), lo que se sentía inconsistente. */
+.service-card-body p,
+.about-mv-card p,
+.card p {
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* --- 3. NUEVO: Hero en 2 columnas para el slider de imágenes ---
+   Antes: .hero-content solo, max-width 700px, dejaba mucho
+   espacio vacío a la derecha en pantallas anchas. */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 968px) {
+  .hero-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--space-10);
+  }
+}
+
+.hero-visual {
+  display: none;
+}
+
+@media (min-width: 968px) {
+  .hero-visual {
+    display: block;
+    animation: fadeUp 0.7s var(--ease-out) 0.3s both;
+  }
+}

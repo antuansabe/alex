@@ -3,43 +3,50 @@ import { useSearchParams } from 'react-router-dom';
 import { company } from '../data/company';
 import { services } from '../data/services';
 import Icon, { WhatsAppIcon } from '../components/ui/Icon';
-import { submitContactForm, submitAppointmentForm, validateEmail } from '../utils/forms';
+import { submitContactForm, validateEmail } from '../utils/forms';
 import { setupScrollAnimations } from '../utils/animations';
 
-const initialContactForm = {
+/**
+ * Flujo unificado — reemplaza el sistema de 2 tabs (Mensaje / Cita).
+ * Ahora es UN solo formulario: el usuario escribe su mensaje y, si
+ * quiere, marca el checkbox "¿Deseas agendar una visita?" para que
+ * aparezcan los campos de fecha y hora, restringidos a los días y
+ * horarios definidos en company.appointments.
+ */
+
+const initialForm = {
   name: '',
   email: '',
   phone: '',
   company: '',
   service: '',
   message: '',
+  wantsAppointment: false,
+  appointmentDate: '',
+  appointmentTime: '',
 };
 
-const initialAppointmentForm = {
-  name: '',
-  email: '',
-  phone: '',
-  service: '',
-  date: '',
-  time: '',
-  notes: '',
-};
+const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+function isAllowedDay(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(`${dateStr}T00:00:00`);
+  return company.appointments.availableDays.includes(d.getDay());
+}
+
+function isAllowedTime(timeStr) {
+  if (!timeStr) return false;
+  const [h] = timeStr.split(':').map(Number);
+  return h >= company.appointments.startHour && h < company.appointments.endHour;
+}
 
 export default function Contact() {
   const [searchParams] = useSearchParams();
   const preselectedService = searchParams.get('servicio') || '';
 
-  const [activeTab, setActiveTab] = useState('message');
-  const [contactForm, setContactForm] = useState({
-    ...initialContactForm,
-    service: preselectedService,
-  });
-  const [appointmentForm, setAppointmentForm] = useState({
-    ...initialAppointmentForm,
-    service: preselectedService,
-  });
+  const [form, setForm] = useState({ ...initialForm, service: preselectedService });
   const [errors, setErrors] = useState({});
-  const [submitState, setSubmitState] = useState('idle'); // idle | loading | success | error
+  const [submitState, setSubmitState] = useState('idle');
   const [submitMessage, setSubmitMessage] = useState('');
 
   useEffect(() => {
@@ -47,82 +54,41 @@ export default function Contact() {
     return cleanup;
   }, []);
 
-  // Update preselected service when query param changes
   useEffect(() => {
     if (preselectedService) {
-      setContactForm((prev) => ({ ...prev, service: preselectedService }));
-      setAppointmentForm((prev) => ({ ...prev, service: preselectedService }));
+      setForm((prev) => ({ ...prev, service: preselectedService }));
     }
   }, [preselectedService]);
 
-  const validateContactForm = () => {
-    const newErrors = {};
-    if (!contactForm.name.trim()) newErrors.name = 'El nombre es obligatorio';
-    if (!contactForm.email.trim()) {
-      newErrors.email = 'El email es obligatorio';
-    } else if (!validateEmail(contactForm.email)) {
-      newErrors.email = 'Ingresa un email válido';
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = 'El nombre es obligatorio';
+    if (!form.email.trim()) {
+      e.email = 'El email es obligatorio';
+    } else if (!validateEmail(form.email)) {
+      e.email = 'Ingresa un email válido';
     }
-    if (!contactForm.message.trim()) newErrors.message = 'El mensaje es obligatorio';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!form.message.trim()) e.message = 'Cuéntanos qué necesitas';
+
+    if (form.wantsAppointment) {
+      if (!form.appointmentDate) {
+        e.appointmentDate = 'Selecciona una fecha';
+      } else if (!isAllowedDay(form.appointmentDate)) {
+        e.appointmentDate = `Solo agendamos ${company.appointments.daysLabel.toLowerCase()}`;
+      }
+      if (!form.appointmentTime) {
+        e.appointmentTime = 'Selecciona una hora';
+      } else if (!isAllowedTime(form.appointmentTime)) {
+        e.appointmentTime = `Horario disponible: ${company.appointments.hoursLabel}`;
+      }
+    }
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const validateAppointmentFormData = () => {
-    const newErrors = {};
-    if (!appointmentForm.name.trim()) newErrors.name = 'El nombre es obligatorio';
-    if (!appointmentForm.email.trim()) {
-      newErrors.email = 'El email es obligatorio';
-    } else if (!validateEmail(appointmentForm.email)) {
-      newErrors.email = 'Ingresa un email válido';
-    }
-    if (!appointmentForm.service) newErrors.service = 'Selecciona un servicio';
-    if (!appointmentForm.date) newErrors.date = 'Selecciona una fecha';
-    if (!appointmentForm.time) newErrors.time = 'Selecciona una hora';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleContactSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateContactForm()) return;
-
-    setSubmitState('loading');
-    setErrors({});
-
-    const result = await submitContactForm(contactForm);
-
-    if (result.success) {
-      setSubmitState('success');
-      setSubmitMessage(result.message);
-      setContactForm({ ...initialContactForm });
-    } else {
-      setSubmitState('error');
-      setSubmitMessage(result.message);
-    }
-  };
-
-  const handleAppointmentSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateAppointmentFormData()) return;
-
-    setSubmitState('loading');
-    setErrors({});
-
-    const result = await submitAppointmentForm(appointmentForm);
-
-    if (result.success) {
-      setSubmitState('success');
-      setSubmitMessage(result.message);
-      setAppointmentForm({ ...initialAppointmentForm });
-    } else {
-      setSubmitState('error');
-      setSubmitMessage(result.message);
-    }
-  };
-
-  const handleContactChange = (field, value) => {
-    setContactForm((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -132,14 +98,46 @@ export default function Contact() {
     }
   };
 
-  const handleAppointmentChange = (field, value) => {
-    setAppointmentForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+  const toggleAppointment = () => {
+    setForm((prev) => ({ ...prev, wantsAppointment: !prev.wantsAppointment }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setSubmitState('loading');
+
+    const payload = {
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      company: form.company,
+      service: form.service,
+      message: form.message,
+    };
+
+    if (form.wantsAppointment) {
+      payload.tipo_solicitud = 'Mensaje + Solicitud de visita';
+      payload.fecha_solicitada = form.appointmentDate;
+      payload.hora_solicitada = form.appointmentTime;
+    } else {
+      payload.tipo_solicitud = 'Mensaje';
+    }
+
+    const result = await submitContactForm(payload);
+
+    if (result.success) {
+      setSubmitState('success');
+      setSubmitMessage(
+        form.wantsAppointment
+          ? '¡Solicitud enviada! Confirmaremos tu visita pronto.'
+          : result.message
+      );
+      setForm({ ...initialForm });
+    } else {
+      setSubmitState('error');
+      setSubmitMessage(result.message);
     }
   };
 
@@ -147,11 +145,6 @@ export default function Contact() {
     setSubmitState('idle');
     setSubmitMessage('');
     setErrors({});
-  };
-
-  const switchTab = (tab) => {
-    setActiveTab(tab);
-    resetForm();
   };
 
   const whatsappUrl = `https://wa.me/${company.contact.whatsapp}?text=${encodeURIComponent(company.contact.whatsappMessage)}`;
@@ -163,7 +156,7 @@ export default function Contact() {
         <div className="container page-header-content">
           <h1>Contacto</h1>
           <p>
-            Estamos listos para ayudarte. Envíanos un mensaje o agenda una cita con nuestro equipo.
+            Cuéntanos qué necesitas. Si quieres, agenda de una vez una visita a tus instalaciones.
           </p>
         </div>
         <div className="page-header-shape" style={{ width: 350, height: 350, top: -120, right: -80 }} />
@@ -174,29 +167,9 @@ export default function Contact() {
       <section style={{ paddingBlock: 'var(--space-10)' }}>
         <div className="container">
           <div className="contact-layout">
-            {/* Left: Contact Form */}
+            {/* Left: Unified Form */}
             <div className="animate-on-scroll">
-              {/* Tabs */}
-              <div className="tabs">
-                <button
-                  className={`tab${activeTab === 'message' ? ' active' : ''}`}
-                  onClick={() => switchTab('message')}
-                  id="contact-tab-message"
-                >
-                  <Icon name="mail" size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-                  Mensaje
-                </button>
-                <button
-                  className={`tab${activeTab === 'appointment' ? ' active' : ''}`}
-                  onClick={() => switchTab('appointment')}
-                  id="contact-tab-appointment"
-                >
-                  <Icon name="calendar" size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-                  Solicitar Cita
-                </button>
-              </div>
 
-              {/* Success State */}
               {submitState === 'success' && (
                 <div className="form-success" id="contact-form-success">
                   <Icon name="check" size={24} style={{ marginBottom: 8, color: 'var(--secondary-500)' }} />
@@ -212,7 +185,6 @@ export default function Contact() {
                 </div>
               )}
 
-              {/* Error State */}
               {submitState === 'error' && (
                 <div style={{ background: 'var(--error)', color: 'var(--white)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', textAlign: 'center', marginBottom: 'var(--space-4)' }}>
                   <p>{submitMessage}</p>
@@ -227,68 +199,67 @@ export default function Contact() {
                 </div>
               )}
 
-              {/* Message Form */}
-              {activeTab === 'message' && submitState !== 'success' && (
-                <form onSubmit={handleContactSubmit} noValidate id="contact-form-message">
+              {submitState !== 'success' && (
+                <form onSubmit={handleSubmit} noValidate id="contact-form-unified">
                   <div className="form-grid">
                     <div className="form-group">
-                      <label className="form-label" htmlFor="contact-name">Nombre *</label>
+                      <label className="form-label" htmlFor="cf-name">Nombre *</label>
                       <input
                         type="text"
-                        id="contact-name"
+                        id="cf-name"
                         className={`form-input${errors.name ? ' error' : ''}`}
                         placeholder="Tu nombre completo"
-                        value={contactForm.name}
-                        onChange={(e) => handleContactChange('name', e.target.value)}
+                        value={form.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
                       />
                       {errors.name && <p className="form-error">{errors.name}</p>}
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" htmlFor="contact-email">Email *</label>
+                      <label className="form-label" htmlFor="cf-email">Email *</label>
                       <input
                         type="email"
-                        id="contact-email"
+                        id="cf-email"
                         className={`form-input${errors.email ? ' error' : ''}`}
                         placeholder="tu@email.com"
-                        value={contactForm.email}
-                        onChange={(e) => handleContactChange('email', e.target.value)}
+                        value={form.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
                       />
                       {errors.email && <p className="form-error">{errors.email}</p>}
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" htmlFor="contact-phone">Teléfono</label>
+                      <label className="form-label" htmlFor="cf-phone">Teléfono</label>
                       <input
                         type="tel"
-                        id="contact-phone"
+                        id="cf-phone"
                         className="form-input"
                         placeholder="+52 000 000 0000"
-                        value={contactForm.phone}
-                        onChange={(e) => handleContactChange('phone', e.target.value)}
+                        value={form.phone}
+                        onChange={(e) => handleChange('phone', e.target.value)}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" htmlFor="contact-company">Empresa</label>
+                      <label className="form-label" htmlFor="cf-company">Empresa</label>
                       <input
                         type="text"
-                        id="contact-company"
+                        id="cf-company"
                         className="form-input"
                         placeholder="Nombre de tu empresa"
-                        value={contactForm.company}
-                        onChange={(e) => handleContactChange('company', e.target.value)}
+                        value={form.company}
+                        onChange={(e) => handleChange('company', e.target.value)}
                       />
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" htmlFor="contact-service">Servicio de interés</label>
+                    <label className="form-label" htmlFor="cf-service">Servicio de interés</label>
                     <select
-                      id="contact-service"
+                      id="cf-service"
                       className="form-select"
-                      value={contactForm.service}
-                      onChange={(e) => handleContactChange('service', e.target.value)}
+                      value={form.service}
+                      onChange={(e) => handleChange('service', e.target.value)}
                     >
                       <option value="">Selecciona un servicio</option>
                       {services.map((s) => (
@@ -298,140 +269,88 @@ export default function Contact() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" htmlFor="contact-message">Mensaje *</label>
+                    <label className="form-label" htmlFor="cf-message">Mensaje *</label>
                     <textarea
-                      id="contact-message"
+                      id="cf-message"
                       className={`form-textarea${errors.message ? ' error' : ''}`}
                       placeholder="¿En qué podemos ayudarte?"
-                      value={contactForm.message}
-                      onChange={(e) => handleContactChange('message', e.target.value)}
+                      value={form.message}
+                      onChange={(e) => handleChange('message', e.target.value)}
                     />
                     {errors.message && <p className="form-error">{errors.message}</p>}
                   </div>
 
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-lg"
-                    disabled={submitState === 'loading'}
-                    id="contact-submit-message"
-                    style={{ width: '100%' }}
+                  {/* ── Checkbox: agendar visita ── */}
+                  <div
+                    style={{
+                      background: 'var(--neutral-50)',
+                      border: '1px solid var(--neutral-200)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: 'var(--space-4)',
+                      marginBottom: 'var(--space-5)',
+                    }}
                   >
-                    {submitState === 'loading' ? (
-                      <>
-                        <span className="spinner" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        Enviar Mensaje
-                        <Icon name="send" size={18} />
-                      </>
+                    <label
+                      htmlFor="cf-wants-appointment"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-3)',
+                        cursor: 'pointer',
+                        fontSize: 'var(--text-sm)',
+                        fontWeight: 600,
+                        color: 'var(--neutral-700)',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        id="cf-wants-appointment"
+                        checked={form.wantsAppointment}
+                        onChange={toggleAppointment}
+                        style={{ width: 18, height: 18, accentColor: 'var(--primary-500)' }}
+                      />
+                      <Icon name="calendar" size={18} style={{ color: 'var(--primary-500)' }} />
+                      ¿Deseas agendar una visita a tus instalaciones?
+                    </label>
+
+                    {form.wantsAppointment && (
+                      <div style={{ marginTop: 'var(--space-4)' }}>
+                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--neutral-500)', marginBottom: 'var(--space-3)' }}>
+                          Disponibilidad actual: {company.appointments.daysLabel}, {company.appointments.hoursLabel}
+                        </p>
+                        <div className="form-grid">
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" htmlFor="cf-appt-date">Fecha preferida *</label>
+                            <input
+                              type="date"
+                              id="cf-appt-date"
+                              className={`form-input${errors.appointmentDate ? ' error' : ''}`}
+                              value={form.appointmentDate}
+                              onChange={(e) => handleChange('appointmentDate', e.target.value)}
+                            />
+                            {errors.appointmentDate && <p className="form-error">{errors.appointmentDate}</p>}
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" htmlFor="cf-appt-time">Hora preferida *</label>
+                            <input
+                              type="time"
+                              id="cf-appt-time"
+                              className={`form-input${errors.appointmentTime ? ' error' : ''}`}
+                              value={form.appointmentTime}
+                              onChange={(e) => handleChange('appointmentTime', e.target.value)}
+                            />
+                            {errors.appointmentTime && <p className="form-error">{errors.appointmentTime}</p>}
+                          </div>
+                        </div>
+                      </div>
                     )}
-                  </button>
-                </form>
-              )}
-
-              {/* Appointment Form */}
-              {activeTab === 'appointment' && submitState !== 'success' && (
-                <form onSubmit={handleAppointmentSubmit} noValidate id="contact-form-appointment">
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-name">Nombre *</label>
-                      <input
-                        type="text"
-                        id="appt-name"
-                        className={`form-input${errors.name ? ' error' : ''}`}
-                        placeholder="Tu nombre completo"
-                        value={appointmentForm.name}
-                        onChange={(e) => handleAppointmentChange('name', e.target.value)}
-                      />
-                      {errors.name && <p className="form-error">{errors.name}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-email">Email *</label>
-                      <input
-                        type="email"
-                        id="appt-email"
-                        className={`form-input${errors.email ? ' error' : ''}`}
-                        placeholder="tu@email.com"
-                        value={appointmentForm.email}
-                        onChange={(e) => handleAppointmentChange('email', e.target.value)}
-                      />
-                      {errors.email && <p className="form-error">{errors.email}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-phone">Teléfono</label>
-                      <input
-                        type="tel"
-                        id="appt-phone"
-                        className="form-input"
-                        placeholder="+52 000 000 0000"
-                        value={appointmentForm.phone}
-                        onChange={(e) => handleAppointmentChange('phone', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-service">Servicio *</label>
-                      <select
-                        id="appt-service"
-                        className={`form-select${errors.service ? ' error' : ''}`}
-                        value={appointmentForm.service}
-                        onChange={(e) => handleAppointmentChange('service', e.target.value)}
-                      >
-                        <option value="">Selecciona un servicio</option>
-                        {services.map((s) => (
-                          <option key={s.id} value={s.title}>{s.title}</option>
-                        ))}
-                      </select>
-                      {errors.service && <p className="form-error">{errors.service}</p>}
-                    </div>
-                  </div>
-
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-date">Fecha preferida *</label>
-                      <input
-                        type="date"
-                        id="appt-date"
-                        className={`form-input${errors.date ? ' error' : ''}`}
-                        value={appointmentForm.date}
-                        onChange={(e) => handleAppointmentChange('date', e.target.value)}
-                      />
-                      {errors.date && <p className="form-error">{errors.date}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="appt-time">Hora preferida *</label>
-                      <input
-                        type="time"
-                        id="appt-time"
-                        className={`form-input${errors.time ? ' error' : ''}`}
-                        value={appointmentForm.time}
-                        onChange={(e) => handleAppointmentChange('time', e.target.value)}
-                      />
-                      {errors.time && <p className="form-error">{errors.time}</p>}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="appt-notes">Notas adicionales</label>
-                    <textarea
-                      id="appt-notes"
-                      className="form-textarea"
-                      placeholder="Cuéntanos más sobre lo que necesitas..."
-                      value={appointmentForm.notes}
-                      onChange={(e) => handleAppointmentChange('notes', e.target.value)}
-                    />
                   </div>
 
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg"
                     disabled={submitState === 'loading'}
-                    id="contact-submit-appointment"
+                    id="contact-submit-unified"
                     style={{ width: '100%' }}
                   >
                     {submitState === 'loading' ? (
@@ -441,8 +360,8 @@ export default function Contact() {
                       </>
                     ) : (
                       <>
-                        Solicitar Cita
-                        <Icon name="calendar" size={18} />
+                        {form.wantsAppointment ? 'Enviar mensaje y solicitar visita' : 'Enviar Mensaje'}
+                        <Icon name="send" size={18} />
                       </>
                     )}
                   </button>
@@ -450,10 +369,9 @@ export default function Contact() {
               )}
             </div>
 
-            {/* Right: Contact Info */}
+            {/* Right: Contact Info (sin cambios) */}
             <div className="animate-on-scroll">
               <div className="contact-info-card">
-                {/* Email */}
                 <div className="contact-info-item">
                   <div className="contact-info-icon">
                     <Icon name="mail" size={20} />
@@ -464,7 +382,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Phone / WhatsApp */}
                 <div className="contact-info-item">
                   <div className="contact-info-icon">
                     <Icon name="phone" size={20} />
@@ -475,7 +392,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Schedule */}
                 <div className="contact-info-item">
                   <div className="contact-info-icon">
                     <Icon name="clock" size={20} />
@@ -488,7 +404,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* WhatsApp Button */}
                 <div style={{ marginTop: 'var(--space-6)' }}>
                   <a
                     href={whatsappUrl}

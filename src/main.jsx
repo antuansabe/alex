@@ -6,6 +6,7 @@ import App from './App';
 import './styles/index.css';
 import './styles/animations.css';
 import './styles/components.css';
+import './styles/fixes.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

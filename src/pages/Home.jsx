@@ -5,6 +5,7 @@ import { company } from '../data/company';
 import { services } from '../data/services';
 import { testimonials } from '../data/testimonials';
 import { setupScrollAnimations, animateCounter } from '../utils/animations';
+import HeroSlider from '../components/ui/HeroSlider';
 
 function StatItem({ number, suffix, label }) {
   const ref = useRef(null);
@@ -84,42 +85,45 @@ export default function Home() {
         <div className="hero-shape hero-shape-2" />
 
         <div className="container">
-          <div className="hero-content">
-            <span className="hero-badge">✦ Mantenimiento Corporativo Integral</span>
+          {/* hero-grid: 2 columnas en desktop (texto + slider), 1 columna en móvil */}
+          <div className="hero-grid">
+            <div className="hero-content">
+              <span className="hero-badge">✦ Mantenimiento Corporativo Integral</span>
 
-            <h1>
-              Soluciones de mantenimiento{' '}
-              <span className="highlight">que transforman</span> tus instalaciones
-            </h1>
+              <h1>
+                Soluciones de mantenimiento{' '}
+                <span className="highlight">que transforman</span> tus instalaciones
+              </h1>
 
-            <p className="hero-description">
-              Cartera completa de servicios profesionales de mantenimiento para
-              corporativos. Calidad, confianza y resultados garantizados.
-            </p>
+              <p className="hero-description">
+                Cartera completa de servicios profesionales de mantenimiento para
+                corporativos. Calidad, confianza y resultados garantizados.
+              </p>
 
-            <div className="hero-actions">
-              <Link to="/contacto" className="btn btn-white btn-lg" id="hero-cta-quote">
-                Solicitar Cotización
-              </Link>
-              <Link
-                to="/servicios"
-                className="btn btn-outline btn-lg"
-                id="hero-cta-services"
-                style={{ borderColor: 'hsla(0,0%,100%,0.3)', color: '#fff' }}
-              >
-                Nuestros Servicios
-              </Link>
+              <div className="hero-actions">
+                <Link to="/contacto" className="btn btn-white btn-lg" id="hero-cta-quote">
+                  Solicitar Cotización
+                </Link>
+                <Link
+                  to="/servicios"
+                  className="btn btn-outline btn-lg"
+                  id="hero-cta-services"
+                  style={{ borderColor: 'hsla(0,0%,100%,0.3)', color: '#fff' }}
+                >
+                  Nuestros Servicios
+                </Link>
+              </div>
+
+              {/* Nota: el bloque de estadísticas se removió de aquí — ya se
+                  muestra una sola vez en la sección "STATS BAR" justo abajo,
+                  para no repetir la misma información dos veces seguidas. */}
             </div>
 
-            <div className="hero-stats">
-              {company.stats.map((stat, index) => (
-                <div key={index} className="hero-stat">
-                  <div className="hero-stat-number">
-                    {stat.number}{stat.suffix}
-                  </div>
-                  <div className="hero-stat-label">{stat.label}</div>
-                </div>
-              ))}
+            {/* Slider de imágenes — placeholder ilustrado, listo para
+                sustituir por fotos reales cuando el cliente las entregue.
+                Ver comentarios en HeroSlider.jsx */}
+            <div className="hero-visual">
+              <HeroSlider />
             </div>
           </div>
         </div>

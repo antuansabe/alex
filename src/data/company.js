@@ -41,6 +41,18 @@ export const company = {
     sunday: 'Domingo: Cerrado',
   },
 
+  // Disponibilidad para agendar VISITAS (formulario unificado de contacto).
+  // availableDays usa el índice de JS Date.getDay(): 0=domingo … 6=sábado.
+  // Cambia estos valores cuando el cliente confirme su disponibilidad real.
+  appointments: {
+    enabled: true,
+    availableDays: [0, 6], // domingo y sábado
+    daysLabel: 'Sábados y domingos',
+    startHour: 8,
+    endHour: 16,
+    hoursLabel: '8:00 AM – 4:00 PM',
+  },
+
   // SEO
   seo: {
     title: 'AF Solutions | Mantenimiento Corporativo Integral',
@@ -51,7 +63,7 @@ export const company = {
     ogImage: '/og-image.jpg',
   },
 
-  // Estadísticas (para la sección de stats)
+  // Estadísticas (se muestran UNA sola vez, en la stats-bar debajo del hero)
   stats: [
     { number: 10, suffix: '+', label: 'Años de experiencia' },
     { number: 50, suffix: '+', label: 'Clientes satisfechos' },
