@@ -60,22 +60,9 @@ export const services = [
       'Servicio in-situ',
     ],
   },
-  {
-    id: 'limpieza-general',
-    category: 'soft',
-    title: 'Limpieza General Corporativa',
-    shortDescription: 'Mantenimiento integral de limpieza para oficinas y espacios corporativos.',
-    fullDescription:
-      'Programa completo de limpieza para mantener tus instalaciones en condiciones óptimas. Incluye limpieza de oficinas, áreas comunes, sanitarios y espacios especializados.',
-    icon: 'building',
-    features: [
-      'Limpieza de oficinas',
-      'Sanitización de baños',
-      'Áreas comunes',
-      'Cristales y ventanales',
-      'Programas personalizados',
-    ],
-  },
+  // NOTA: el servicio "Limpieza General Corporativa" (id: limpieza-general)
+  // se retiró del catálogo el 20/09/2026 a petición del cliente.
+  // Si se quiere recuperar, está en el historial de git (commit daaba0a).
 
   // --- SERVICIOS HARD ---
   {
