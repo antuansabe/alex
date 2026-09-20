@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://afsolutions.mx/sitemap.xml
+Sitemap: https://afsolutions.com.mx/sitemap.xml

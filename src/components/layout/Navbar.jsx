@@ -6,6 +6,7 @@ const navLinks = [
   { path: '/', label: 'Inicio' },
   { path: '/nosotros', label: 'Quiénes Somos' },
   { path: '/servicios', label: 'Servicios' },
+  { path: '/domicilio', label: 'A Domicilio' },
   { path: '/contacto', label: 'Contacto' },
 ];
 
@@ -58,11 +59,14 @@ export default function Navbar() {
     <>
       <nav className={navbarClass} id="navbar-main">
         <div className="navbar-inner">
-          {/* Logo */}
+          {/* Logo oficial — el archivo vive en /public/af-solutions-logo.png */}
           <Link to="/" className="navbar-logo" id="navbar-logo-link">
-            <span className="navbar-logo-text">
-              AF <span>Solutions</span>
-            </span>
+            <img
+              src="/af-solutions-logo.png"
+              alt="AF Solutions — All Facilities Solutions"
+              width="524"
+              height="128"
+            />
           </Link>
 
           {/* Desktop links */}

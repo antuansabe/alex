@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon, { WhatsAppIcon } from '../components/ui/Icon';
 import { company } from '../data/company';
 import { services } from '../data/services';
-import { testimonials } from '../data/testimonials';
 import { setupScrollAnimations, animateCounter } from '../utils/animations';
 import HeroSlider from '../components/ui/HeroSlider';
 
@@ -37,37 +36,6 @@ function StatItem({ number, suffix, label }) {
 }
 
 export default function Home() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [visibleSlides, setVisibleSlides] = useState(1);
-
-  // Calculate visible slides based on window width
-  const updateVisibleSlides = useCallback(() => {
-    const width = window.innerWidth;
-    if (width >= 1024) {
-      setVisibleSlides(3);
-    } else if (width >= 640) {
-      setVisibleSlides(2);
-    } else {
-      setVisibleSlides(1);
-    }
-  }, []);
-
-  useEffect(() => {
-    updateVisibleSlides();
-    window.addEventListener('resize', updateVisibleSlides);
-    return () => window.removeEventListener('resize', updateVisibleSlides);
-  }, [updateVisibleSlides]);
-
-  // Auto-slide every 5 seconds
-  const maxIndex = Math.max(0, testimonials.length - visibleSlides);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [maxIndex]);
-
   // Scroll animations
   useEffect(() => {
     const cleanup = setupScrollAnimations();
@@ -285,70 +253,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ====== TESTIMONIALS SECTION ====== */}
-      <section
-        className="section"
-        id="testimonials"
-        style={{ background: 'var(--neutral-50)' }}
-      >
-        <div className="container">
-          <div className="section-title animate-on-scroll">
-            <span className="section-title-badge">Testimonios</span>
-            <h2>Lo que dicen nuestros clientes</h2>
-          </div>
-
-          <div className="testimonials-carousel animate-on-scroll">
-            <div
-              className="testimonials-track"
-              style={{
-                transform: `translateX(-${activeIndex * (100 / visibleSlides)}%)`,
-              }}
-            >
-              {testimonials.map((testimonial) => (
-                <div className="testimonials-slide" key={testimonial.id}>
-                  <div className="testimonial-card">
-                    <div className="testimonial-quote-icon">
-                      <Icon name="quote" size={32} />
-                    </div>
-
-                    <div className="testimonial-rating">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <span className="testimonial-star" key={i}>
-                          <Icon name="star" size={18} />
-                        </span>
-                      ))}
-                    </div>
-
-                    <p className="testimonial-text">{testimonial.text}</p>
-
-                    <div className="testimonial-author">
-                      <div className="testimonial-avatar">{testimonial.initial}</div>
-                      <div className="testimonial-author-info">
-                        <h4>{testimonial.name}</h4>
-                        <p>
-                          {testimonial.role}, {testimonial.company}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="testimonials-dots">
-              {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-                <button
-                  key={i}
-                  className={`testimonials-dot ${i === activeIndex ? 'active' : ''}`}
-                  onClick={() => setActiveIndex(i)}
-                  aria-label={`Ir al testimonio ${i + 1}`}
-                  id={`testimonial-dot-${i}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ====== TESTIMONIALS SECTION — OCULTA ======
+           Sección desactivada a petición del cliente (20/09/2026).
+           Los testimonios seguían siendo de ejemplo (Carlos Mendoza,
+           María Fernández). Para reactivarla hay que: (1) reemplazar
+           el contenido de src/data/testimonials.js por testimonios
+           reales, y (2) recuperar el bloque JSX del carrusel desde el
+           commit b567be1 en git.
+      */}
 
       {/* ====== CTA BANNER ====== */}
       <section className="cta-banner" id="cta-banner">

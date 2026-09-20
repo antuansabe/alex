@@ -8,6 +8,7 @@ const quickLinks = [
   { path: '/', label: 'Inicio' },
   { path: '/nosotros', label: 'Quiénes Somos' },
   { path: '/servicios', label: 'Servicios' },
+  { path: '/domicilio', label: 'Servicio a Domicilio' },
   { path: '/contacto', label: 'Contacto' },
 ];
 
@@ -21,9 +22,13 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand section */}
           <div className="footer-brand" id="footer-brand">
-            <h3 className="footer-brand-name">
-              AF <span>Solutions</span>
-            </h3>
+            <img
+              className="footer-logo"
+              src="/af-solutions-logo.png"
+              alt="AF Solutions — All Facilities Solutions"
+              width="524"
+              height="128"
+            />
             <p>{company.description}</p>
             <div className="footer-social" id="footer-social-row">
               <a
