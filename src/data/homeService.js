@@ -43,22 +43,9 @@ export const homeService = {
     { step: 'Secado y recomendaciones', detail: 'Aceleramos el secado y te damos cuidados posteriores.' },
   ],
 
-  // Precios estimados
-  pricingTitle: 'Precios estimados',
-  pricing: [
-    { service: 'Silla de comedor tapizada', range: '$80 – $150 c/u' },
-    { service: 'Silla de oficina', range: '$150 – $250 c/u' },
-    { service: 'Sillón individual', range: '$300 – $450' },
-    { service: 'Sillón de 2 plazas', range: '$400 – $550' },
-    { service: 'Sillón de 3 plazas', range: '$500 – $600' },
-    { service: 'Colchón individual', range: '$500 – $650' },
-    { service: 'Colchón matrimonial', range: '$600 – $750' },
-    { service: 'Colchón queen / king', range: '$700 – $850' },
-  ],
-  pricingNotes: [
-    'Precios sujetos a tamaño, tipo de tela, nivel de suciedad, manchas, presencia de mascotas y ubicación.',
-    'Solicita tu cotización por WhatsApp compartiendo fotos de los muebles.',
-  ],
+
+  quoteNote:
+    'Cotización sin costo: mándanos fotos de los muebles por WhatsApp y te damos precio el mismo día.',
 
   whatsappMessage:
     'Hola, me interesa el servicio de lavado de muebles a domicilio. ¿Me pueden dar una cotización?',

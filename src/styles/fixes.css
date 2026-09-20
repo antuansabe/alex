@@ -113,7 +113,7 @@
 }
 
 /* ============================================================
-   SERVICIO A DOMICILIO (página /domicilio)
+   SERVICIO A DOMICILIO (columna derecha de /servicios)
    ============================================================ */
 
 .hs-badges {
@@ -256,9 +256,57 @@
   line-height: 1.55;
 }
 
-.hs-pricing-card {
-  max-width: 720px;
-  margin-inline: auto;
+
+/* ============================================================
+   /servicios — layout de dos columnas
+   Izquierda: corporativo · Derecha: a domicilio
+   ============================================================ */
+
+.services-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .services-split {
+    grid-template-columns: 1.35fr 1fr;
+    gap: var(--space-10);
+  }
+
+  /* La columna de hogar acompaña el scroll en pantallas grandes */
+  .services-col-home {
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--space-4));
+  }
+}
+
+.services-col-head {
+  margin-bottom: var(--space-8);
+}
+
+.services-col-head h2 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-2xl);
+}
+
+.services-col-head p {
+  color: var(--neutral-500);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Dentro de la columna izquierda las tarjetas van en una sola fila
+   por servicio, para que no queden apretadas. */
+@media (min-width: 1100px) {
+  .services-split .services-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Panel de servicio a domicilio --- */
+.hs-panel {
   background: var(--white);
   border: 1px solid var(--neutral-200);
   border-radius: var(--radius-xl);
@@ -266,64 +314,94 @@
   padding: var(--space-6);
 }
 
-.hs-pricing-table {
-  width: 100%;
-  border-collapse: collapse;
+.hs-panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  margin: var(--space-7) 0 var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.hs-panel-title:first-child {
+  margin-top: 0;
+}
+
+.hs-panel-title svg {
+  flex-shrink: 0;
+  color: var(--secondary-500);
+}
+
+.hs-process-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hs-process-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.hs-process-list h4 {
+  margin: 0 0 2px;
   font-size: var(--text-sm);
 }
 
-.hs-pricing-table th {
-  text-align: left;
-  background: var(--primary-700, hsl(210, 55%, 24%));
-  color: var(--white);
-  font-weight: 600;
-  padding: var(--space-3) var(--space-4);
-}
-
-.hs-pricing-table th:first-child {
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-}
-
-.hs-pricing-table th:last-child {
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  text-align: right;
-}
-
-.hs-pricing-table td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--neutral-200);
-  color: var(--neutral-700);
-}
-
-.hs-pricing-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.hs-pricing-table tbody tr:nth-child(even) {
-  background: var(--neutral-50);
-}
-
-.hs-price {
-  text-align: right;
-  font-weight: 600;
-  white-space: nowrap;
-  color: var(--primary-700, hsl(210, 55%, 24%));
-}
-
-.hs-pricing-notes {
-  margin-top: var(--space-5);
-}
-
-.hs-pricing-notes p {
-  margin: 0 0 var(--space-2);
+.hs-process-list p {
+  margin: 0;
   font-size: var(--text-xs);
   color: var(--neutral-500);
   line-height: 1.5;
 }
 
-.hs-pricing-cta {
+.hs-step-number {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--primary-500);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: var(--text-sm);
+}
+
+/* Los badges viven ahora sobre fondo claro */
+.hs-panel .hs-badges {
+  justify-content: flex-start;
+  margin-top: var(--space-6);
+}
+
+.hs-panel .hs-badge {
+  background: var(--neutral-50);
+  border-color: var(--neutral-200);
+  color: var(--neutral-600);
+}
+
+.hs-panel .hs-badge svg {
+  color: var(--secondary-500);
+}
+
+.hs-panel-cta {
   display: flex;
   width: 100%;
   justify-content: center;
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.hs-panel-note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-xs);
+  color: var(--neutral-500);
+  text-align: center;
+  line-height: 1.5;
 }

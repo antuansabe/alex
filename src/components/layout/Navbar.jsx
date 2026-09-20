@@ -6,7 +6,6 @@ const navLinks = [
   { path: '/', label: 'Inicio' },
   { path: '/nosotros', label: 'Quiénes Somos' },
   { path: '/servicios', label: 'Servicios' },
-  { path: '/domicilio', label: 'A Domicilio' },
   { path: '/contacto', label: 'Contacto' },
 ];
 

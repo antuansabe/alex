@@ -8,7 +8,6 @@ const quickLinks = [
   { path: '/', label: 'Inicio' },
   { path: '/nosotros', label: 'Quiénes Somos' },
   { path: '/servicios', label: 'Servicios' },
-  { path: '/domicilio', label: 'Servicio a Domicilio' },
   { path: '/contacto', label: 'Contacto' },
 ];
 

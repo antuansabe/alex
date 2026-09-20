@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -7,7 +7,6 @@ import WhatsAppButton from './components/layout/WhatsAppButton';
 import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
-import HomeService from './pages/HomeService';
 import Contact from './pages/Contact';
 
 // Título que aparece en la pestaña del navegador para cada ruta.
@@ -15,8 +14,7 @@ import Contact from './pages/Contact';
 const pageTitles = {
   '/': 'AF Solutions | Mantenimiento Corporativo Integral',
   '/nosotros': 'Quiénes Somos | AF Solutions',
-  '/servicios': 'Servicios de Mantenimiento Corporativo | AF Solutions',
-  '/domicilio': 'Lavado de Salas, Sillones y Colchones a Domicilio | AF Solutions',
+  '/servicios': 'Servicios Corporativos y a Domicilio | AF Solutions',
   '/contacto': 'Contacto y Cotización | AF Solutions',
 };
 
@@ -52,7 +50,8 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/nosotros" element={<About />} />
           <Route path="/servicios" element={<Services />} />
-          <Route path="/domicilio" element={<HomeService />} />
+          {/* La pagina de domicilio se unifico dentro de /servicios */}
+          <Route path="/domicilio" element={<Navigate to="/servicios" replace />} />
           <Route path="/contacto" element={<Contact />} />
         </Routes>
       </main>
